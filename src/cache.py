@@ -1,16 +1,18 @@
 from datetime import datetime
 
+from utils import BotU
+
 from .config import CLEAR_CACHE_HOURS
 from .logger import Logger
-from .wiki import parse
 
 
 class Cache:
     logger: Logger
     cache = {}
 
-    def __init__(self, logger):
+    def __init__(self, logger, bot: BotU):
         self.logger = logger
+        self.bot = bot
         pass
 
     async def get(self, query: str) -> dict:
@@ -30,8 +32,9 @@ class Cache:
             try: return emb.build()
             except: return emb
         
+        cog = self.bot.get_cog('CommandsCog')
         self.cache[query] = {
-            'embed': await parse(query, False),
+            'embed': await cog.parse(query, False),# type: ignore
             'time': datetime.now()
         }
         self.logger.info(f'Cached {query}')
@@ -40,3 +43,6 @@ class Cache:
             return emb.build()
         except Exception: 
             return emb
+
+async def setup(bot: BotU):
+    pass

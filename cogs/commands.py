@@ -28,7 +28,7 @@ from utils import (
     logger_computer,
 )
 
-allpages: list = []
+allpages = []
 
 async def wiki_autocomplete(interaction: discord.Interaction, current: str):
     global allpages
@@ -40,8 +40,9 @@ class CommandsCog(CogU, name='Farm Computer'):
     prevs: list = []
 
     def __init__(self, bot: BotU):
+        self.cache = Cache(logger, bot)
 
-        self.cache = Cache(logger)
+        self.infloop.start()
         #self.cache.set_ttl(60 * 60 * 24)
         #self.cache.set_max_size(1000)
 
@@ -78,7 +79,7 @@ class CommandsCog(CogU, name='Farm Computer'):
         r = None
         if prev in self.prevs: return None
         
-        r = await (await self._get('https://stardewvalleywiki.com/Special:AllPages?from=&to=z&namespace=0&hideredirects=1',False)).text()
+        r = await (await self._get('https://stardewvalleywiki.com/Special:AllPages?from=&to=z&namespace=0&hideredirects=1')).text()
 
         b = BeautifulSoup(r, 'html.parser')
 
@@ -96,9 +97,16 @@ class CommandsCog(CogU, name='Farm Computer'):
             returnv.append(str(site.replace("%27","'").replace("%20"," ").replace('_'," "))[1:])
         return returnv
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        global allpages
+        allpages = await self.getallpages()
+        self.prevs.clear()
+
     @tasks.loop(time=[datetime.time(hour=x, minute=0) for x in range(24)])
     async def infloop(self):
-        self.allpages = await self.getallpages()
+        global allpages
+        allpages = await self.getallpages()
         self.prevs.clear()
         if CLEAR_CACHE_HOURS <= 0:
             CLEAR_CACHE_HOURS = 5
@@ -395,7 +403,6 @@ def cleanSellPrice(price: str) -> str:
     return re.sub(regex, "", price)
 
 
-
-
-
-
+async def setup(bot: BotU):
+    cog = CommandsCog(bot)
+    await bot.add_cog(cog)

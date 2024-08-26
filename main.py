@@ -1,18 +1,16 @@
+import asyncio
 import datetime
 import time
 
 import aiohttp
 import discord
 from discord.ext import commands
+import environ
 import yaml
 
-import environ
-from utils import (
-    BotU,
-    Help,
-    MentionableTree,
-    handler,
-)
+from cogs import EXTENSIONS
+from utils import BotU, Help, MentionableTree
+from utils.custom_constants import handler
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -29,17 +27,6 @@ if PROD:
 
 prefixes = ["fc!"]
 
-bot = BotU(
-    command_prefix=commands.when_mentioned_or(*prefixes),
-    intents=intents,
-    activity=discord.Activity(type=discord.ActivityType.watching, name="the Rainbow Six Siege Pro League"),
-    status=discord.Status.dnd,
-    help_command=Help(),
-    tree_cls=MentionableTree,
-)
-tree = bot.tree
-
-
 currentdate_epoch = int(time.time())
 currentdate = datetime.datetime.fromtimestamp(currentdate_epoch)
 
@@ -50,6 +37,21 @@ PROD: {PROD}
 {currentdate}
 {currentdate_epoch}"""
 )
+
+bot = BotU(
+    command_prefix=commands.when_mentioned_or(*prefixes),
+    intents=intents,
+    activity=discord.Activity(type=discord.ActivityType.watching, name="the Rainbow Six Siege Pro League"),
+    status=discord.Status.dnd,
+    help_command=Help(),
+    tree_cls=MentionableTree,
+)
+tree = bot.tree
+
+@bot.event
+async def on_ready():
+    date = datetime.datetime.fromtimestamp(int(time.time()))
+    print(f"{date}: Ready!")
 
 async def main():
     #if PROD:
@@ -96,3 +98,6 @@ async def main():
                 # await bot.load_extension("utils.cogs.error_handler")
                 # bot_logger.debug("Loaded extension utils.cogs.error_handler")
                 await bot.start(token)
+
+if __name__ == "__main__":
+    asyncio.run(main())

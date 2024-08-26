@@ -1,22 +1,5 @@
-# from src.config import (
-#     IRIDIUM_EMOJI,
-#     GOLD_EMOJI,
-#     SILVER_EMOJI,
-#     HEALTH_EMOJI,
-#     ENERGY_EMOJI,
-#     COIN_EMOJI,
-#     POISON_EMOJI,
-#     IRIDIUM_ENERGY_EMOJI,
-#     GOLD_ENERGY_EMOJI,
-#     SILVER_ENERGY_EMOJI,
-#     IRIDIUM_HEALTH_EMOJI,
-#     GOLD_HEALTH_EMOJI,
-#     SILVER_HEALTH_EMOJI,
-#     IRIDIUM_POISON_EMOJI,
-#     GOLD_POISON_EMOJI,
-#     SILVER_POISON_EMOJI
-# )
 from utils import emojidict
+
 def getQualityFromPath(path):
     if path.endswith('Iridium_Quality.png'):
         return emojidict.get("iridium")
