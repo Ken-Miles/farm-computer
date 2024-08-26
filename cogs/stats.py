@@ -340,6 +340,8 @@ class Stats(CogU):
     @commands.hybrid_command(name='uptime')
     async def uptime_cmd(self, ctx: ContextU):
         """Tells you how long the bot has been up for."""
+        await ctx.defer(ephemeral=True)
+
         if not hasattr(self, 'uptime'):
             return await ctx.reply('Bot has not connected to the gateway yet.', delete_after=10, ephemeral=True)
         await ctx.reply(f'Bot has been up since {dctimestamp(self.uptime,"R")}.', ephemeral=True)
@@ -370,6 +372,8 @@ class Stats(CogU):
         if not hasattr(self, 'uptime'):
             return await ctx.reply('Bot has not connected to the gateway yet.',ephemeral=True, delete_after=10)
 
+        await ctx.defer(ephemeral=True)
+        
         revision = self.get_last_commits()
         embed = discord.Embed(description='Latest Changes:\n' + revision)
         embed.title = 'Official Bot Server Invite'
