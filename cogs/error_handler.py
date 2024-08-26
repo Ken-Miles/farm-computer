@@ -23,7 +23,7 @@ from utils import (
     prompt,
 )
 
-ERROR_FORUM = 1253173059339288625
+ERROR_FORUM = 1277467073810923561
 TESTING_GUILD = 1029151630215618600
 
 permission_proper_names: Dict[str, str] = {
