@@ -1,0 +1,7 @@
+aiohttp
+BeautifulSoup4
+colorama
+discord.py @ git+https://github.com/Rapptz/discord.py
+jishaku
+python-environ
+PyYAML==6.0.1
