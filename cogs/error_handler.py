@@ -13,6 +13,7 @@ from utils import (
     CogU,
     ContextU,
     CustomBaseView,
+    SUPPORT_SERVER,
     URLButton,
     dchyperlink,
     dctimestamp,
