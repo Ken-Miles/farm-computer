@@ -24,7 +24,7 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
           cd ${{ vars.PROJECT_DIR }}
-          git pull origin master
+          git pull origin rewrite
           source .venv/bin/activate
           aerich migrate
           aerich upgrade
