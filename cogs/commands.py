@@ -95,6 +95,10 @@ class CommandsCog(CogU, name='Farm Computer'):
     @app_commands.allowed_installs(guilds=True, users=True)
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     async def wiki(self, ctx: ContextU, *, query: str):
+        """
+        Search the Stardew Valley Wiki for a specific page.
+        """
+
         eph = False
         if ctx.guild: 
             eph = ctx.guild.id not in GUILDS
