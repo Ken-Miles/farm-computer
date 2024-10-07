@@ -31,6 +31,7 @@ Python-3.10.0/
 *.yml
 *.yaml
 *.json
+!deploy.yml
 
 db.py
 db_beta.py
