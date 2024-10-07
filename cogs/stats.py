@@ -349,7 +349,7 @@ class Stats(CogU):
         await ctx.defer(ephemeral=eph)
 
         if ctx.interaction is None and eph:
-            mention = await self.bot.get_command_mention('about')
+            mention = await self.bot.get_command_mention('uptime')
             return await ctx.reply(f"You can only use the text version of this command in DMs. Use {mention} instead.",delete_after=5)
 
         if not hasattr(self, 'uptime'):
