@@ -63,7 +63,7 @@ class CommandsCog(CogU, name='Farm Computer'):
         if ctx.guild: 
             eph = ctx.guild.id not in GUILDS
 
-        await ctx.defer()
+        await ctx.defer(ephemeral=eph)
 
         start = time.time()
 
