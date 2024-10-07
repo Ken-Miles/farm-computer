@@ -154,7 +154,7 @@ class CommandsCog(CogU, name='Farm Computer'):
 
         try:
             url = f"https://stardewvalleywiki.com/{query}"
-            r = await self._get(url)
+            r = await self.session.get(url)
             if r.status > 350:
                 # print(r.status)
                 raise Exception()
@@ -165,7 +165,7 @@ class CommandsCog(CogU, name='Farm Computer'):
             # print(r.status)
             url = f"https://stardewvalleywiki.com/mediawiki/index.php?search={encoded}"
 
-            res = await self._get(url)
+            res = await self.session.get(url)
 
             soup = bs4.BeautifulSoup(await res.text(), "html.parser")
 
@@ -188,7 +188,7 @@ class CommandsCog(CogU, name='Farm Computer'):
                 full_href = f"https://stardewvalleywiki.com{href}"
 
             if full_href != url and full_href != urllib.parse.urlparse(url).path:
-                r = await self._get(full_href)
+                r = await self.session.get(full_href)
                 status = r.status
 
         if status == 200:
@@ -221,7 +221,7 @@ class CommandsCog(CogU, name='Farm Computer'):
 
             return help().build() if build else help()
 
-        html = await (await self._get(url)).text()
+        html = await (await self.session.get(url)).text()
         soup = bs4.BeautifulSoup(html, "html.parser")
 
         # find the first <img> that does NOT have a srcset attr
