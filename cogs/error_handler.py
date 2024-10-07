@@ -422,6 +422,8 @@ class ErrorHandler(CogU, hidden=True):
             timestamp=discord.utils.utcnow(),
         )
 
+        sent = False
+
         if ctx.interaction:
             if ctx.interaction.is_user_integration():
                 if not ctx.permissions.embed_links:
