@@ -32,7 +32,7 @@ class Cache:
             try: return emb.build()
             except: return emb
         
-        cog = self.bot.get_cog('CommandsCog')
+        cog = self.bot.get_cog('Farm Computer')
         self.cache[query] = {
             'embed': await cog.parse(query, False),# type: ignore
             'time': datetime.now()
