@@ -27,6 +27,8 @@ from utils import (
     generic_autocomplete,
     logger,
     logger_computer,
+    dchyperlink,
+    CustomBaseView
 )
 
 allpages = []
@@ -36,11 +38,41 @@ async def wiki_autocomplete(interaction: discord.Interaction, current: str):
 
     return await generic_autocomplete(current, allpages, interaction=interaction)
 
+def get_hyperlink_or_text(detail_tag: bs4.element.Tag) -> str:
+    atags = detail_tag.find_all("a")
+    s = ""
+    if atags:
+        tag = None
+        for tag in atags:
+
+            href = tag["href"]
+            # get absolute url
+            href = urllib.parse.urljoin("https://stardewvalleywiki.com", href)
+
+            s += f"{dchyperlink(href, tag.text).strip()}{tag.text.replace(tag.text, '').rstrip()}"
+            # check tag to ensure there is no text next to it after the hyperlink
+            if tag.next_sibling:
+                s += f"{tag.next_sibling}"
+            
+        # use regex to check for unclosed parenthases, then close them if they are open
+        if s.count('(') > s.count(')'):
+            s = s.rstrip()
+            s += ')'
+        elif s.count('(') < s.count(')'):
+            s = '(' + s
+    else:
+        s = detail_tag.text
+    s = s.replace('\t',' ').replace('\xa0',' ')
+    while '  ' in s:
+        s = s.replace('  ',' ')
+    return s.replace('\n','').strip()
+
 link_regex = r'\[\[(.+)\]\]'
 bad_link_regex = r'\[\[.+\]\]\(.+\)'
 
 class CommandsCog(CogU, name='Farm Computer'):
     prevs: list = []
+    cache: Cache
 
     def __init__(self, bot: BotU):
         self.bot = bot
@@ -75,6 +107,14 @@ class CommandsCog(CogU, name='Farm Computer'):
             mention = await self.bot.get_command_mention('wiki')
             return await ctx.reply(f"You can only use the text version of this command in DMs. Use {mention} instead.",delete_after=5)
 
+        if ctx.interaction:
+            if ctx.interaction.is_user_integration():
+                if not ctx.permissions.embed_links and not eph:
+                    return await ctx.reply("You need the embed links permission to use this command here.")
+            elif ctx.interaction.is_guild_integration():
+                if not ctx.bot_permissions.embed_links:
+                    return await ctx.reply("I need the embed links permission to use this command here.")
+
         proper_query = query
         if proper_query not in allpages:
             for x in allpages:
@@ -85,7 +125,13 @@ class CommandsCog(CogU, name='Farm Computer'):
         proper_query = urllib.parse.quote(proper_query.replace(" ","_"))
 
         emb = await self.search(proper_query,cache=self.cache)
-        await ctx.reply(embed=emb)
+        
+        view = CustomBaseView(timeout=None)
+        view.add_item(
+            discord.ui.Button(style=discord.ButtonStyle.link, label="View on Stardew Valley Wiki", url=emb.url)
+        )
+        view.message =  await ctx.reply(embed=emb, view=view)
+
         end = time.time()
         logger_computer.info(f"Looked up {str(emb.title)[:str(emb.title).find('-')-1]} for {ctx.author} in {end-start} seconds.")
 
@@ -148,12 +194,16 @@ class CommandsCog(CogU, name='Farm Computer'):
     ) -> discord.Embed:
         if not self.logger:
             self.logger = _logger
+        
+        if not cache:
+            cache = self.cache
 
         start_time = time.time()
 
         if isinstance(query, list) or isinstance(query, tuple):
             query = " ".join(query)
         encoded = query.replace(" ", "+")
+        #encoded = urllib.parse.quote(query)
 
         r = None
         status = None
@@ -342,15 +392,26 @@ class CommandsCog(CogU, name='Farm Computer'):
                     detail = text
 
                 elif spans := detail.find_all("span", {"class": "no-wrap"}):
-                    detail = spans[0].text
+                    detail = get_hyperlink_or_text(spans[0])
                 elif spans := detail.find_all("span", {"style": "display: none;"}):
                     # logger.info(f'Found span: {spans}')
-                    detail = detail.text.replace(spans[0].text, "")
+                    #detail = detail.text.replace(spans[0].text, "")
+                    if spans[0].find_all("a"):
+                        href = spans[0].find_all("a")[0]["href"]
+                        # get absolute url
+                        href = urllib.parse.urljoin("https://stardewvalleywiki.com", href)
+
+                        detail = dchyperlink(href, detail.text.replace(spans[0].text, ""))
+                    else:
+                        detail = detail.text.replace(spans[0].text, "")
 
                 elif spans := detail.find_all("span", {"class": "nametemplate"}):
                     items = []
                     for span in spans:
-                        items.append(span.text)
+                        #items.append(span.text)
+                        text = get_hyperlink_or_text(span)
+                        items.append(text)
+
                     detail = ", ".join(items)
 
                 elif p_tags := detail.find_all(
@@ -358,7 +419,7 @@ class CommandsCog(CogU, name='Farm Computer'):
                 ):
                     items = []
                     for p in p_tags:
-                        items.append(p.text)
+                        items.append(get_hyperlink_or_text(p))
 
                     detail = ", ".join(items)
                 elif [
@@ -409,7 +470,9 @@ class CommandsCog(CogU, name='Farm Computer'):
                             detail += f"{pair[0]}"
 
                 else:
-                    detail = detail.text
+                    #detail = detail.text
+                    # maybe a hyperlink?
+                    detail = get_hyperlink_or_text(detail)
 
                 embed.fields.append({"name": section, "value": detail, "inline": False})
                 # except Exception as e:

@@ -21,48 +21,52 @@ def getHealthEnergyPoisonFromPath(path):
     return None
 
 def checkIfShouldBeGoldCoin(foreimages, path=None):
-    if not path:
-        path = foreimages[0].find_all('img')[0]['src']
+    try:
+        if not path:
+            path = foreimages[0].find_all('img')[0]['src']
 
-    if path.endswith('Gold_Quality_Icon.png'):
-        return emojidict.get("coin")
-
-    return None
-
-def qualityHealthEnergyPoison(back_path, foreimages):
-    imgs = foreimages[0].find_all('img')
-
-    if not len(imgs) > 0:
+        if path.endswith('Gold_Quality_Icon.png'):
+            return emojidict.get("coin")
+        else:
+            return None
+    except Exception as e:
         return None
 
-    fore_path = imgs[0]['src']
+def qualityHealthEnergyPoison(back_path, foreimages):
+    try:
+        imgs = foreimages[0].find_all('img')
 
-    # print(f'fore_path: {fore_path}')
-    # print(f'back_path: {back_path}')
+        if not len(imgs) > 0:
+            return None
 
-    if fore_path.endswith('Silver_Quality_Icon.png'):
-        if back_path.endswith('Health.png'):
-            return emojidict.get("SILVER_HEALTH")
-        elif back_path.endswith('Energy.png'):
-            return emojidict.get("SILVER_ENERGY")
-        elif back_path.endswith('Poison.png'):
-            return emojidict.get("SILVER_POISON")
-    elif fore_path.endswith('Gold_Quality_Icon.png'):
-        if back_path.endswith('Health.png'):
-            return emojidict.get("GOLD_HEALTH")
-        elif back_path.endswith('Energy.png'):
-            return emojidict.get("GOLD_ENERGY")
-        elif back_path.endswith('Poison.png'):
-            return emojidict.get("GOLD_POISON")
-    elif fore_path.endswith('Iridium_Quality_Icon.png'):
-        if back_path.endswith('Health.png'):
-            return emojidict.get("IRIDIUM_HEALTH")
-        elif back_path.endswith('Energy.png'):
-            return emojidict.get("IRIDIUM_ENERGY")
-        elif back_path.endswith('Poison.png'):
-            return emojidict.get("IRIDIUM_POISON")
+        fore_path = imgs[0]['src']
 
-    return None
+        # print(f'fore_path: {fore_path}')
+        # print(f'back_path: {back_path}')
+
+        if fore_path.endswith('Silver_Quality_Icon.png'):
+            if back_path.endswith('Health.png'):
+                return emojidict.get("SILVER_HEALTH")
+            elif back_path.endswith('Energy.png'):
+                return emojidict.get("SILVER_ENERGY")
+            elif back_path.endswith('Poison.png'):
+                return emojidict.get("SILVER_POISON")
+        elif fore_path.endswith('Gold_Quality_Icon.png'):
+            if back_path.endswith('Health.png'):
+                return emojidict.get("GOLD_HEALTH")
+            elif back_path.endswith('Energy.png'):
+                return emojidict.get("GOLD_ENERGY")
+            elif back_path.endswith('Poison.png'):
+                return emojidict.get("GOLD_POISON")
+        elif fore_path.endswith('Iridium_Quality_Icon.png'):
+            if back_path.endswith('Health.png'):
+                return emojidict.get("IRIDIUM_HEALTH")
+            elif back_path.endswith('Energy.png'):
+                return emojidict.get("IRIDIUM_ENERGY")
+            elif back_path.endswith('Poison.png'):
+                return emojidict.get("IRIDIUM_POISON")
+    finally:
+        return None
 
 def identify(str, pagename=None, foreimages=None, backimage=None):
     if q := getQualityFromPath(str):

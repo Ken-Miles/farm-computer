@@ -1,4 +1,7 @@
 from datetime import datetime
+from typing import Dict, Union
+
+import discord
 
 from utils import BotU
 
@@ -8,7 +11,7 @@ from .logger import Logger
 
 class Cache:
     logger: Logger
-    cache = {}
+    cache: Dict[str, Dict[str, Union[discord.Embed, datetime]]] = {}
 
     def __init__(self, logger, bot: BotU):
         self.logger = logger
