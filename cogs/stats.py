@@ -46,6 +46,7 @@ from utils import (
     Cooldown,
     FiveButtonPaginator,
     GITHUB_URL,
+    GUILDS,
     STATS_WEBHOOK_URL,
     SUPPORT_SERVER,
     create_paginator,
@@ -341,7 +342,15 @@ class Stats(CogU):
     @commands.hybrid_command(name='uptime')
     async def uptime_cmd(self, ctx: ContextU):
         """Tells you how long the bot has been up for."""
-        await ctx.defer(ephemeral=True)
+        eph = False
+        if ctx.guild: 
+            eph = ctx.guild.id not in GUILDS
+
+        await ctx.defer(ephemeral=eph)
+
+        if ctx.interaction is None and eph:
+            mention = await self.bot.get_command_mention('about')
+            return await ctx.reply(f"You can only use the text version of this command in DMs. Use {mention} instead.",delete_after=5)
 
         if not hasattr(self, 'uptime'):
             return await ctx.reply('Bot has not connected to the gateway yet.', delete_after=10, ephemeral=True)
@@ -369,6 +378,15 @@ class Stats(CogU):
     @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     async def about(self, ctx: ContextU):
         """Tells you information about the bot itself."""
+        eph = False
+        if ctx.guild: 
+            eph = ctx.guild.id not in GUILDS
+
+        await ctx.defer(ephemeral=eph)
+
+        if ctx.interaction is None and eph:
+            mention = await self.bot.get_command_mention('about')
+            return await ctx.reply(f"You can only use the text version of this command in DMs. Use {mention} instead.",delete_after=5)
 
         if not hasattr(self, 'uptime'):
             return await ctx.reply('Bot has not connected to the gateway yet.',ephemeral=True, delete_after=10)
