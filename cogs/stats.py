@@ -390,8 +390,6 @@ class Stats(CogU):
 
         if not hasattr(self, 'uptime'):
             return await ctx.reply('Bot has not connected to the gateway yet.',ephemeral=True, delete_after=10)
-
-        await ctx.defer(ephemeral=True)
         
         revision = self.get_last_commits()
         embed = discord.Embed(description='Latest Changes:\n' + revision)
