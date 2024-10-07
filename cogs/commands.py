@@ -46,6 +46,8 @@ class CommandsCog(CogU, name='Farm Computer'):
         self.infloop.start()
 
         self.session = aiohttp.ClientSession()
+
+        self.logger = logger_computer
         #self.cache.set_ttl(60 * 60 * 24)
         #self.cache.set_max_size(1000)
 
