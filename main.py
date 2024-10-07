@@ -41,7 +41,7 @@ PROD: {PROD}
 bot = BotU(
     command_prefix=commands.when_mentioned_or(*prefixes),
     intents=intents,
-    activity=discord.Activity(type=discord.ActivityType.watching, name="the Rainbow Six Siege Pro League"),
+    activity=discord.Activity(type=discord.ActivityType.watching, name="over Pelican Town"),
     status=discord.Status.dnd,
     help_command=Help(),
     tree_cls=MentionableTree,
