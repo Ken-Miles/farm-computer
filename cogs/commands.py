@@ -71,6 +71,9 @@ link_regex = r'\[\[(.+)\]\]'
 bad_link_regex = r'\[\[.+\]\]\(.+\)'
 
 class CommandsCog(CogU, name='Farm Computer'):
+    """
+    Main commands for Farm Computer. This includes the wiki command.
+    """
     prevs: list = []
     cache: Cache
 
