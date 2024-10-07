@@ -5,6 +5,9 @@
 #CONFIG = json.load(file)
 
 CLEAR_CACHE_HOURS = 5
+OLD_WIKI_REDIRECT = True
+WIKITEXT_LINKING = True
+
 # BOT_TOKEN = CONFIG['token']
 # BOT_PREFIX = CONFIG['prefix']
 

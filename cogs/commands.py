@@ -15,7 +15,7 @@ from discord import app_commands
 from discord.ext import commands, tasks
 
 from src.cache import Cache
-from src.config import CLEAR_CACHE_HOURS
+from src.config import CLEAR_CACHE_HOURS, OLD_WIKI_REDIRECT, WIKITEXT_LINKING
 from src.embed import EmbedBuilder
 from src.emotes import getQualityFromPath, identify
 from utils import (
@@ -36,6 +36,8 @@ async def wiki_autocomplete(interaction: discord.Interaction, current: str):
 
     return await generic_autocomplete(current, allpages, interaction=interaction)
 
+link_regex = r'\[\[(.+)\]\]'
+bad_link_regex = r'\[\[.+\]\]\(.+\)'
 
 class CommandsCog(CogU, name='Farm Computer'):
     prevs: list = []
@@ -48,8 +50,8 @@ class CommandsCog(CogU, name='Farm Computer'):
         self.session = aiohttp.ClientSession()
 
         self.logger = logger_computer
-        #self.cache.set_ttl(60 * 60 * 24)
-        #self.cache.set_max_size(1000)
+        self.cache.set_ttl(60 * 60 * 24)
+        self.cache.set_max_size(1000)
 
 
     @commands.hybrid_command(name="wiki", description = "Search the Stardew Valley Wiki for a specific page.")#guild=MAIN_SERVER)
@@ -419,6 +421,30 @@ class CommandsCog(CogU, name='Farm Computer'):
         # logger.info(f'Got embed: {embed}')
         # return embed.build()
         return embed.build() if build else embed
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.author == self.bot.user:
+            return
+        
+        content = str(message.content)
+        
+        if OLD_WIKI_REDIRECT:
+            for community_wiki_link in re.findall(r"https://stardewcommunitywiki\.com/[a-zA-Z0-9_/:\-%]*", content):
+                link_path = urllib.parse.urlparse(community_wiki_link).path
+                new_url = urllib.parse.urljoin('https://stardewvalleywiki.com', link_path)
+                await message.channel.send(f"I notice you're linking to the old wiki, that wiki has been in a read-only state for several months. Here are the links to that page on the new wiki: {new_url}")
+        
+        if WIKITEXT_LINKING:
+            links = re.findall(link_regex, content)
+            if links and not re.findall(bad_link_regex, content):
+                for link in links:
+                    r = await self.session.get(f'https://stardewvalleywiki.com/{link}')
+
+                    if r.status in [301, 302, 304, 400, 404]:
+                        return
+                    else:
+                        await message.reply(f'<https://stardewvalleywiki.com/{link}>', mention_author=False)
 
 def cleanSellPrice(price: str) -> str:
     regex = r'data-sort-value="[a-zA-Z0-9-_ ]+"'
