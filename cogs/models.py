@@ -916,7 +916,7 @@ class DiscordChannels(Base):
     channel_id = fields.BigIntField(unique=True)
     """The ID of the channel."""
 
-    name = fields.CharField(max_length=256)
+    name = fields.CharField(max_length=256, null=True)
     """The name of the channel."""
 
     jump_url = fields.CharField(max_length=1024, null=True)
