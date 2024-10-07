@@ -425,4 +425,3 @@ def cleanSellPrice(price: str) -> str:
 async def setup(bot: BotU):
     cog = CommandsCog(bot)
     await bot.add_cog(cog)
-
