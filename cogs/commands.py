@@ -43,6 +43,8 @@ class CommandsCog(CogU, name='Farm Computer'):
     prevs: list = []
 
     def __init__(self, bot: BotU):
+        self.bot = bot
+        
         self.cache = Cache(logger, bot)
 
         self.infloop.start()
