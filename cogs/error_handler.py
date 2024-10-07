@@ -421,7 +421,24 @@ class ErrorHandler(CogU, hidden=True):
             timestamp=discord.utils.utcnow(),
         )
 
-        await ctx.reply(embed=emb, view=view, **kwargs)
+        if ctx.interaction:
+            if ctx.interaction.is_user_integration():
+                if not ctx.permissions.embed_links:
+                    sent = True
+                    message = f"I am not able to use embeds in this server. In order to use my commands, you must have the `{permission_proper_names.get('embed_links')}` permission."
+                    if message != "An error occured while running this command.":
+                        message += f"\n> Original error: {message}"
+
+                    try:
+                        await ctx.reply(message, view=view, **kwargs)
+                    except discord.NotFound:
+                        await ctx.send(message, view=view, **kwargs)
+
+        if not sent:
+            try:
+                await ctx.reply(embed=emb, view=view, **kwargs)
+            except discord.NotFound:
+                await ctx.send(embed=emb, view=view, **kwargs)
 
     @commands.Cog.listener()
     async def on_ready(self):

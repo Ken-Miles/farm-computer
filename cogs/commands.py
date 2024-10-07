@@ -51,6 +51,8 @@ class CommandsCog(CogU, name='Farm Computer'):
     @Cooldown(1,5,commands.BucketType.user)
     @app_commands.autocomplete(query=wiki_autocomplete)
     @app_commands.describe(query="What you want to search the Stardew Valley wiki for.")
+    @app_commands.allowed_installs(guilds=True, users=True)
+    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
     async def wiki(self, ctx: ContextU, *, query: str):
         eph = False
         if ctx.guild: 
@@ -75,11 +77,26 @@ class CommandsCog(CogU, name='Farm Computer'):
         end = time.time()
         logger_computer.info(f"Looked up {str(emb.title)[:str(emb.title).find('-')-1]} for {ctx.author} in {end-start} seconds.")
 
-    async def getallpages(self, sites: list=[], prev=None):
+    async def getallpages(self, sites: list=[], prev=None, first_iteration: bool=True):
+        print('running')
         r = None
         if prev in self.prevs: return None
         
-        r = await (await self._get('https://stardewvalleywiki.com/Special:AllPages?from=&to=z&namespace=0&hideredirects=1')).text()
+        if first_iteration:
+            r = await self._get('https://stardewvalleywiki.com/Special:AllPages?from=&to=z&namespace=0&hideredirects=1')
+        else:
+            r = await self._get(prev)
+        
+        print('responded')
+
+        r = await r.text()
+
+        if prev:
+            print("more data after this")
+        elif first_iteration:
+            print("first iteration")
+        else:
+            print("reached last page")
 
         b = BeautifulSoup(r, 'html.parser')
 
@@ -89,9 +106,8 @@ class CommandsCog(CogU, name='Farm Computer'):
 
         for next in b.find_all('a',{"title": "Special:AllPages"}):
             if "Next page" in next.text:    
-                r = await self.getallpages(sites, "https://stardewvalleywiki.com"+next.get("href"))  
+                r = await self.getallpages(sites, "https://stardewvalleywiki.com"+next.get("href"), first_iteration=False)  
                 self.prevs.append("https://stardewvalleywiki.com"+next.get("href"))  
-
         returnv = []
         for site in sites:
             returnv.append(str(site.replace("%27","'").replace("%20"," ").replace('_'," "))[1:])
