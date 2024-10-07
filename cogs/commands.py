@@ -82,9 +82,9 @@ class CommandsCog(CogU, name='Farm Computer'):
                     proper_query = x
                     break
         
-        proper_query = urllib.parse.urlencode(proper_query.replace(" ","_"))
+        proper_query = urllib.parse.quote(proper_query.replace(" ","_"))
 
-        emb = await self.search(urllib.parse.urlencode(proper_query),cache=self.cache)
+        emb = await self.search(proper_query,cache=self.cache)
         await ctx.reply(embed=emb)
         end = time.time()
         logger_computer.info(f"Looked up {str(emb.title)[:str(emb.title).find('-')-1]} for {ctx.author} in {end-start} seconds.")
