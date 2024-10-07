@@ -50,8 +50,8 @@ class CommandsCog(CogU, name='Farm Computer'):
         self.session = aiohttp.ClientSession()
 
         self.logger = logger_computer
-        self.cache.set_ttl(60 * 60 * 24)
-        self.cache.set_max_size(1000)
+        #self.cache.set_ttl(60 * 60 * 24)
+        #self.cache.set_max_size(1000)
 
 
     @commands.hybrid_command(name="wiki", description = "Search the Stardew Valley Wiki for a specific page.")#guild=MAIN_SERVER)
