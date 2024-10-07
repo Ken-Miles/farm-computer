@@ -7,6 +7,7 @@ import time
 from typing import Optional
 import urllib.parse
 
+import aiohttp
 from bs4 import BeautifulSoup
 import bs4
 import discord
@@ -43,6 +44,8 @@ class CommandsCog(CogU, name='Farm Computer'):
         self.cache = Cache(logger, bot)
 
         self.infloop.start()
+
+        self.session = aiohttp.ClientSession()
         #self.cache.set_ttl(60 * 60 * 24)
         #self.cache.set_max_size(1000)
 
@@ -83,9 +86,9 @@ class CommandsCog(CogU, name='Farm Computer'):
         if prev in self.prevs: return None
         
         if first_iteration:
-            r = await self._get('https://stardewvalleywiki.com/Special:AllPages?from=&to=z&namespace=0&hideredirects=1')
+            r = await self.session.get('https://stardewvalleywiki.com/Special:AllPages?from=&to=z&namespace=0&hideredirects=1')
         else:
-            r = await self._get(prev)
+            r = await self.session.get(prev)
         
         print('responded')
 
