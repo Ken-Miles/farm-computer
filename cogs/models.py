@@ -1473,8 +1473,8 @@ class PastDiscordMessages(DiscordMessages):
         await old.fetch_related('guild', 'channel', 'author', 'reference', 'attachments')
         instance = await cls.create(
             guild=getattr(old.guild, 'guild_id', None),
-            channel=old.channel.channel_id,
-            author=old.author.user_id,
+            channel=getattr(old.channel, 'channel_id', None),
+            author=getattr(old.author, 'user_id', None),
             tts=old.tts,
             type=old.type,
             content=old.content,
