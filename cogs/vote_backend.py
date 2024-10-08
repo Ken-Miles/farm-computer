@@ -27,10 +27,10 @@ with open('apikeys.yml','r') as f:
     apikeys = dict(yaml.safe_load(f))
     TOPGG_TOKEN = apikeys.get('topgg')
     DISCORDBOTLIST_TOKEN = apikeys.get('discordbotlist')
-    DISCORDBOTSGG_TOKEN = apikeys.get('discordbotsgg')
-    DISCORDLISTGG_TOKEN = apikeys.get('discordlistgg')
-    BOTLIST_ME_TOKEN = apikeys.get('botlistme')
-    assert TOPGG_TOKEN is not None and DISCORDBOTLIST_TOKEN is not None and DISCORDBOTSGG_TOKEN is not None and DISCORDLISTGG_TOKEN is not None and BOTLIST_ME_TOKEN is not None
+    #DISCORDBOTSGG_TOKEN = apikeys.get('discordbotsgg')
+    #DISCORDLISTGG_TOKEN = apikeys.get('discordlistgg')
+    #BOTLIST_ME_TOKEN = apikeys.get('botlistme')
+    #assert TOPGG_TOKEN is not None and DISCORDBOTLIST_TOKEN is not None and DISCORDBOTSGG_TOKEN is not None and DISCORDLISTGG_TOKEN is not None and BOTLIST_ME_TOKEN is not None
 
 class VoteBackend(CogU, name='Voting Backend', hidden=True):
     bot: BotU
