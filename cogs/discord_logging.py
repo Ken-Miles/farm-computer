@@ -143,16 +143,17 @@ class DiscordLogging(CogU, hidden=True):
             await DiscordUsers.from_user(member, self.bot)
 
 async def setup(bot: BotU):
-    cog = DiscordLogging(bot)
+    #cog = DiscordLogging(bot)
     #cog.update.start()
     #await bot.add_cog(cog)
 
-    env = environ.Env(
-        PROD=(bool, False)
-    )
+    # env = environ.Env(
+    #     PROD=(bool, False)
+    # )
 
     # PROD = env("PROD")
     # if PROD:
     #     await Tortoise.init(config_file="db.yml")
     # else:
     #     await Tortoise.init(config_file="db_beta.yml")
+    pass
