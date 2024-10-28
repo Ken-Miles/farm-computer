@@ -1,6 +1,8 @@
 import asyncio
 import datetime
+from gettext import gettext as _
 import time
+from typing import List
 
 import aiohttp
 import discord
@@ -9,20 +11,31 @@ import environ
 import yaml
 
 from cogs import EXTENSIONS
-from utils import BotU, Help, MentionableTree
-from utils.custom_constants import handler
+from utils import (
+    BotU as OldBotU,
+    Help,
+    MentionableTree,
+    handler,
+    makeembed_failedaction,
+)
 
 intents = discord.Intents.default()
 intents.message_content = True
 
 env = environ.Env(
     PROD=(bool, False),
+    DEBUG=(bool, False)
 )
 
 PROD = env("PROD")
 
+DEBUG = env("DEBUG")
+
 if PROD:
     with open("client.yml", "r") as f:
+        token = dict(yaml.safe_load(f)).get("token")
+else:
+    with open("client_beta.yml", "r") as f:
         token = dict(yaml.safe_load(f)).get("token")
 
 prefixes = ["fc!"]
@@ -30,23 +43,38 @@ prefixes = ["fc!"]
 currentdate_epoch = int(time.time())
 currentdate = datetime.datetime.fromtimestamp(currentdate_epoch)
 
+
 if __name__ == "__main__":
     print(
     f"""Started running:
 PROD: {PROD}
+DEBUG: {DEBUG}
 {currentdate}
 {currentdate_epoch}"""
 )
 
-bot = BotU(
-    command_prefix=commands.when_mentioned_or(*prefixes),
-    intents=intents,
-    activity=discord.Activity(type=discord.ActivityType.watching, name="over Pelican Town"),
-    status=discord.Status.dnd,
-    help_command=Help(),
-    tree_cls=MentionableTree,
-)
-tree = bot.tree
+if PROD:
+    intents = discord.Intents.default()
+else:
+    intents = discord.Intents.all()
+#intents.message_content = True
+#intents.members = True
+
+class BotU(OldBotU):
+    blacklist: List
+    started_at: datetime.datetime
+
+    async def check_blacklist(self, ctx):
+        if getattr(self, _('blacklist'), None):
+            if blacklist_obj := discord.utils.find(lambda x: x.offender_id == ctx.author.id, self.blacklist):
+                desc = _("You are currently blacklisted from using the bot. Please reach out to the bot developer on the support server for more information.")
+                if blacklist_obj.reason:
+                    desc += _("Reason: `{}`").format(blacklist_obj.reason)
+                emb = makeembed_failedaction(description=desc)
+                await ctx.reply(embed=emb, ephemeral=True, delete_after=10 if not ctx.interaction else None)
+                return False
+        return True
+
 
 @bot.event
 async def on_ready():
