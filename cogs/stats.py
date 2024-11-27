@@ -188,7 +188,7 @@ class Stats(CogU, name="Statistics", hidden=True):
     async def cog_unload(self):
         self.bulk_insert_loop.stop()
         self.logging_worker.cancel()
-        self.log_new_authorized_users.stop()
+        #self.log_new_authorized_users.stop()
 
     @tasks.loop(seconds=10.0)
     async def bulk_insert_loop(self):
@@ -370,8 +370,8 @@ class Stats(CogU, name="Statistics", hidden=True):
         # if not hasattr(self, _('uptime')):
         #     self.uptime = discord.utils.utcnow()
 
-        if not self.log_new_authorized_users.is_running():
-            self.log_new_authorized_users.start()
+        # if not self.log_new_authorized_users.is_running():
+        #     self.log_new_authorized_users.start()
 
         if not hasattr(self, 'uptime'):
             self.uptime = discord.utils.utcnow()
