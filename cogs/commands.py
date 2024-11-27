@@ -76,7 +76,6 @@ class CommandsCog(CogU, name='Farm Computer'):
     """
     prevs: list = []
     cache: Cache
-    logger = None
 
     def __init__(self, bot: BotU):
         self.bot = bot
@@ -87,7 +86,7 @@ class CommandsCog(CogU, name='Farm Computer'):
 
         self.session = aiohttp.ClientSession()
 
-        self.logger = logger_computer
+        self.logger_ = logger_computer
         #self.cache.set_ttl(60 * 60 * 24)
         #self.cache.set_max_size(1000)
 
@@ -200,8 +199,8 @@ class CommandsCog(CogU, name='Farm Computer'):
     async def search(
         self, query: str, _logger: Optional[logging.Logger] = None, cache=None
     ) -> discord.Embed:
-        if not self.logger:
-            self.logger = _logger
+        if not self.logger_:
+            self.logger_ = _logger
         
         if not cache:
             cache = self.cache
