@@ -80,7 +80,7 @@ class CommandsCog(CogU, name='Farm Computer'):
     def __init__(self, bot: BotU):
         self.bot = bot
 
-        self.cache = Cache(logger, bot)
+        self.cache = Cache(logger_computer, bot)
 
         self.infloop.start()
 
