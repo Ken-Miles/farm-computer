@@ -304,16 +304,7 @@ class ReportedErrors(Base):
         table = "ReportedErrors"
 
 
-class DiscordGuilds(Base):
-    # id 
-    # created_at
-    # updated_at
 
-    # basic guild info 
-    guild_id = fields.BigIntField(unique=True)
-    """The ID of the guild."""
-
-    name = fields.C
 class DiscordGuilds(Base):
     # id 
     # created_at
