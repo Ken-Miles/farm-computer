@@ -313,6 +313,16 @@ class DiscordGuilds(Base):
     guild_id = fields.BigIntField(unique=True)
     """The ID of the guild."""
 
+    name = fields.C
+class DiscordGuilds(Base):
+    # id 
+    # created_at
+    # updated_at
+
+    # basic guild info 
+    guild_id = fields.BigIntField(unique=True)
+    """The ID of the guild."""
+
     name = fields.CharField(max_length=256)
     """The guild name."""
 
@@ -577,7 +587,8 @@ class DiscordGuilds(Base):
                 'bot_joined_at': guild.me.joined_at,
                 'chunked': guild.chunked,
                 'large': guild.large,
-                'bot_in_guild': guild.me is not None
+                #'bot_in_guild': guild.me is not None
+                'bot_in_guild': getattr(getattr(guild, 'me', None), 'joined_at', None) is not None
             }
         )
 
@@ -589,10 +600,94 @@ class DiscordGuilds(Base):
             for role in guild.roles:
                 await DiscordRoles.from_role(role, bot=bot, guild=instance)
 
-        if guild.members:
-            for member in guild.members:
-                await DiscordMembers.from_member(member, bot=bot, guild=instance)
+        # if guild.members:
+        #     for member in guild.members:
+        #         await DiscordMembers.from_member(member, bot=bot, guild=instance)
 
+        return instance
+
+    @classmethod
+    async def from_raw(cls, data: dict):
+        #         {
+        #   "id": "197038439483310086",
+        #   "name": "Discord Testers",
+        #   "icon": "f64c482b807da4f539cff778d174971c",
+        #   "description": "The official place to report Discord Bugs!",
+        #   "splash": null,
+        #   "discovery_splash": null,
+        #   "features": [
+        #     "ANIMATED_ICON",
+        #     "VERIFIED",
+        #     "NEWS",
+        #     "VANITY_URL",
+        #     "DISCOVERABLE",
+        #     "MORE_EMOJI",
+        #     "INVITE_SPLASH",
+        #     "BANNER",
+        #     "COMMUNITY"
+        #   ],
+        #   "emojis": [],
+        #   "banner": "9b6439a7de04f1d26af92f84ac9e1e4a",
+        #   "owner_id": "73193882359173120",
+        #   "application_id": null,
+        #   "region": null,
+        #   "afk_channel_id": null,
+        #   "afk_timeout": 300,
+        #   "system_channel_id": null,
+        #   "widget_enabled": true,
+        #   "widget_channel_id": null,
+        #   "verification_level": 3,
+        #   "roles": [],
+        #   "default_message_notifications": 1,
+        #   "mfa_level": 1,
+        #   "explicit_content_filter": 2,
+        #   "max_presences": 40000,
+        #   "max_members": 250000,
+        #   "vanity_url_code": "discord-testers",
+        #   "premium_tier": 3,
+        #   "premium_subscription_count": 33,
+        #   "system_channel_flags": 0,
+        #   "preferred_locale": "en-US",
+        #   "rules_channel_id": "441688182833020939",
+        #   "public_updates_channel_id": "281283303326089216",
+        #   "safety_alerts_channel_id": "281283303326089216"
+        # }
+        owner = await DiscordUsers.get_or_none(user_id=data.get('owner_id'))
+
+        instance, _ = await cls.update_or_create(
+            guild_id=data['id'],
+            defaults={
+                'name': data.get('name'),
+                'description': data.get('description'),
+                'guild_owner_id': data.get('owner_id'),
+                'owner': owner,
+                'icon_url': f"https://cdn.discordapp.com/icons/{data['id']}/{data['icon']}.png" if data['icon'] else None,
+                'banner_url': f"https://cdn.discordapp.com/banners/{data['id']}/{data['banner']}.png" if data['banner'] else None,
+                'splash_url': f"https://cdn.discordapp.com/splashes/{data['id']}/{data['splash']}.png" if data['splash'] else None,
+                'discovery_splash_url': f"https://cdn.discordapp.com/discovery-splashes/{data['id']}/{data['discovery_splash']}.png" if data['discovery_splash'] else None,
+                'features': data.get('features',None),
+                'vanity_url': data.get('vanity_url',None),
+                'vanity_url_code': data.get('vanity_url_code',None),
+                'afk_timeout': data.get('afk_timeout',None),
+                'system_channel_id': data.get('system_channel_id',None),
+                'widget_enabled': data.get('widget_enabled',None),
+                'widget_channel_id': data.get('widget_channel_id',None),
+                'verification_level': data.get('verification_level',None),
+                'default_notifications': data.get('default_message_notifications',None),
+                'mfa_level': data.get('mfa_level',None),
+                'explicit_content_filter': data.get('explicit_content_filter',None),
+                'max_presences': data.get('max_presences',None),
+                'max_members': data.get('max_members',None),
+                'premium_tier': data.get('premium_tier',None),
+                'premium_subscription_count': data.get('premium_subscription_count',None),
+                'preferred_locale': data.get('preferred_locale',None),
+                'rules_channel_id': data.get('rules_channel_id',None),
+                'public_updates_channel_id': data.get('public_updates_channel_id',None),
+                'safety_alerts_channel_id': data.get('safety_alerts_channel_id',None),
+                'system_channel_flags': data.get('system_channel_flags',None),
+                'bot_in_guild': True,
+            }
+        )
         return instance
 
     class Meta:
@@ -777,6 +872,46 @@ class DiscordUsers(Base):
 
         return instance
 
+    @classmethod
+    async def from_raw(cls, data: dict):
+        #         {
+        #   "id": "80351110224678912",
+        #   "username": "Nelly",
+        #   "discriminator": "1337",
+        #   "avatar": "8342729096ea3675442027381ff50dfe",
+        #   "verified": true,
+        #   "email": "nelly@discord.com",
+        #   "flags": 64,
+        #   "banner": "06c16474723fe537c283b8efa61a30c8",
+        #   "accent_color": 16711680,
+        #   "premium_type": 1,
+        #   "public_flags": 64,
+        #   "avatar_decoration_data": {
+        #     "sku_id": "1144058844004233369",
+        #     "asset": "a_fed43ab12698df65902ba06727e20c0e"
+        #   }
+        # }
+        old_instance = await cls.filter(user_id=data['id']).first()
+
+        if old_instance and datetime.datetime.now(datetime.timezone.utc) -  getattr(old_instance, 'updated_at', datetime.datetime.now(datetime.timezone.utc)) > datetime.timedelta(hours=6):
+            await PastDiscordUsers.from_db(old_instance)
+        
+        instance, _ = await cls.update_or_create(
+            user_id=data['id'],
+            defaults={
+                'name': data.get('username'),
+                'discriminator': data.get('discriminator'),
+                'avatar_url': f"https://cdn.discordapp.com/avatars/{data['id']}/{data.get('avatar',None)}.png" if data.get('avatar',None) else None,
+                'avatar_decoration_url': f"https://cdn.discordapp.com/avatars/{data['id']}/{data.get('avatar_decoration_data',{}).get('asset',None)}.png" if data.get('avatar_decoration_data',None) else None,
+                'avatar_decoration_sku_id': data.get('avatar_decoration_data',{}).get('sku_id',None) if data.get('avatar_decoration_data',None) else None,
+                'banner_url': f"https://cdn.discordapp.com/banners/{data['id']}/{data.get('banner',None)}.png" if data.get('banner',None) else None,
+                'accent_color': data.get('accent_color',None),
+                'premium_type': data.get('premium_type',None),
+                'public_flags': data.get('public_flags',None),
+            }
+        )
+        return instance
+
     class Meta:
         table = "DiscordUsers"
 
@@ -848,7 +983,7 @@ class DiscordMembers(Base):
     web_status = fields.CharField(max_length=512, null=True)
     """The member's status on a web device, if applicable."""
 
-    color = fields.CharField(max_length=512, null=True)
+    color = fields.IntField(null=True)
     """A property that returns a colour denoting the rendered colour for the member. If the default colour is the one rendered then an instance of Colour.default() is returned."""
 
     guild_avatar_url = fields.CharField(max_length=1024, null=True)
@@ -886,11 +1021,11 @@ class DiscordMembers(Base):
                 'pending': member.pending,
                 'premium_since': member.premium_since,
                 'timed_out_until': member.timed_out_until,
-                'raw_status': str(member.raw_status) if member.raw_status else None,
-                'status': str(member.status.value) if member.status else None,
-                'mobile_status': str(member.mobile_status.value) if member.mobile_status else None,
-                'desktop_status': str(member.desktop_status.value) if member.desktop_status else None,
-                'web_status': str(member.web_status.value) if member.web_status else None,
+                'raw_status': member.raw_status,
+                'status': member.status.value,
+                'mobile_status': member.mobile_status.value,
+                'desktop_status': member.desktop_status.value,
+                'web_status': member.web_status.value,
                 'color': member.color.value,
                 'guild_avatar_url': member.guild_avatar.url if member.guild_avatar else None,
                 'guild_avatar_bytes': await member.guild_avatar.read() if member.guild_avatar else None,
@@ -905,7 +1040,8 @@ class DiscordMembers(Base):
 
 class PastDiscordMembers(DiscordMembers):
     """A table to store past members, or previous versions of members."""
-    guild = fields.BigIntField()
+    
+    guild = fields.BigIntField(null=True)
     """The ID of the guild."""
 
     user = fields.BigIntField()
@@ -1501,8 +1637,8 @@ class PastDiscordMessages(DiscordMessages):
         await old.fetch_related('guild', 'channel', 'author', 'reference', 'attachments')
         instance = await cls.create(
             guild=getattr(old.guild, 'guild_id', None),
-            channel=getattr(old.channel, 'channel_id', None),
-            author=getattr(old.author, 'user_id', None),
+            channel=old.channel.channel_id,
+            author=old.author.user_id,
             tts=old.tts,
             type=old.type,
             content=old.content,
@@ -1697,6 +1833,242 @@ class PastDiscordAttachments(DiscordAttachments):
     class Meta:
         table = "PastDiscordAttachments"
 
+
+class AuthStorageDiscord(Base):
+    """Stores state for login callbacks"""
+
+    user = fields.ForeignKeyField("my_app.AuthenticatedUser", related_name="auth", null=True)
+    
+    token_type = fields.CharField(max_length=10)
+    """The type of token. Usually 'Bearer'."""
+
+    access_token = fields.TextField()
+    """The access token."""
+
+    expires_at = fields.DatetimeField()
+    """The time the token expires.
+    Derived from the expires_in field in the token response."""
+
+    refresh_token = fields.TextField()
+    """The refresh token."""
+
+    scopes = fields.JSONField()
+    """The scopes of the token."""
+
+    client_id = fields.BigIntField()
+    """The client ID of the application that requested the token."""
+
+    state = fields.TextField(null=True)
+    """The state of the token. Used for CSRF protection."""
+
+    is_authorized = fields.BooleanField(default=True)
+    """Specifies if the token is authorized."""
+
+    @classmethod
+    async def from_api_resp(cls, data: dict, client_id: int, state: Optional[str]=None, user: Optional['AuthenticatedUser']=None) -> Tuple[Self, bool]:
+        expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=data['expires_in'])
+        scopes = data['scope']
+        if isinstance(scopes, str):
+            scopes = [x for x in scopes.split(" ")]
+        scopes = sorted(scopes)
+        instance, _ = await cls.update_or_create(
+            user=user,
+            defaults={
+                'token_type': data['token_type'],
+                'access_token': data['access_token'],
+                'expires_at': expires_at,
+                'refresh_token': data['refresh_token'],
+                'scopes': sorted(scopes),
+                'client_id': client_id,
+                'state': state,
+                'is_authorized': True
+            }
+            # token_type=data['token_type'],
+            # access_token=data['access_token'],
+            # expires_at=expires_at,
+            # refresh_token=data['refresh_token'],
+            # scopes=data['scope'],
+            # client_id=client_id,
+            # state=state,
+            # user=user
+        )
+        return (instance, _)
+
+    @property
+    def is_expired(self):
+        return datetime.datetime.now(datetime.timezone.utc) > self.expires_at
+    
+    def to_auth_header(self):
+        return f"{self.token_type} {self.access_token}"
+
+    class Meta:
+        table = "AuthStorageDiscord"
+
+class AuthenticatedUser(Base):
+    """Model to store details of an authenticated user."""
+
+    id = fields.BigIntField(pk=True, unique=True)
+    """The ID of the user."""
+
+    username = fields.CharField(max_length=32)
+    """The username of the user."""
+
+    discriminator = fields.CharField(max_length=4, default=None, null=True)
+    """The discriminator of the user."""
+
+    global_name = fields.CharField(max_length=32, default=None, null=True)
+    """The display name of the user."""
+
+    created_at = fields.DatetimeField()
+    """The time the user was created.
+    Not provided by the API, derived from the user's ID."""
+
+    avatar_url = fields.CharField(max_length=512, default=None, null=True)
+    """The URL of the user's avatar."""
+
+    bot = fields.BooleanField(default=False)
+    """Whether the user is a bot."""
+
+    system = fields.BooleanField(default=False)
+    """Whether the user is a system user."""
+
+    mfa_enabled = fields.BooleanField(default=False)
+    """Whether the user has two factor authentication enabled."""
+
+    banner_url = fields.CharField(max_length=512, default=None, null=True)
+    """The URL of the user's banner."""
+
+    accent_color = fields.IntField(default=None, null=True)
+    """The color of the user's banner."""
+
+    locale = fields.CharField(max_length=8, default=None, null=True)
+    """The user's chosen language."""
+
+    verified = fields.BooleanField(default=False)
+    """Whether the user's email is verified."""
+
+    email = fields.CharField(max_length=128, default=None, null=True)
+    """The user's email."""
+
+    flags = fields.IntField(default=None, null=True)
+    """The flags on the user's account."""
+
+    premium_type = fields.IntField(default=None, null=True)
+    """The type of Nitro subscription on the user's account."""
+
+    public_flags = fields.IntField(default=None, null=True)
+    """The public flags on the user's account."""
+
+    avatar_decoration_data = fields.JSONField(default=None, null=True)
+    """Data for the user's avatar decoration."""
+
+    @classmethod
+    async def from_api_resp(cls, data: dict):
+        avatar_url = f"https://cdn.discordapp.com/avatars/{data['id']}/{data['avatar']}.png"
+        banner_url = f"https://cdn.discordapp.com/banners/{data['id']}/{data['banner']}.png"
+
+        instance, _ = await cls.update_or_create(
+            id=data['id'],
+            defaults={
+                'username': data['username'],
+                'discriminator': data['discriminator'],
+                'global_name': data.get('global_name', None),
+                'created_at': snowflake_time(int(data['id'])),
+                'avatar_url': avatar_url,
+                'bot': data.get('bot', False),
+                'system': data.get('system', False),
+                'mfa_enabled': data.get('mfa_enabled', False),
+                'banner_url': banner_url,
+                'accent_color': data.get('accent_color', None),
+                'locale': data.get('locale', None),
+                'verified': data.get('verified', False),
+                'email': data.get('email', None),
+                'flags': data.get('flags', None),
+                'premium_type': data.get('premium_type', None),
+                'public_flags': data.get('public_flags', None),
+                'avatar_decoration_data': data.get('avatar_decoration_data', None),
+            }
+        )
+
+        return instance
+
+    class Meta:
+        table = "AuthenticatedUser"
+
+class AuthenticatedUserConnections(Base):
+    """A model to store a user's connections."""
+
+    #     Field	Type	Description
+    # id	string	id of the connection account
+    # name	string	the username of the connection account
+    # type	string	the service of this connection
+    # revoked?	boolean	whether the connection is revoked
+    # integrations?	array	an array of partial server integrations
+    # verified	boolean	whether the connection is verified
+    # friend_sync	boolean	whether friend sync is enabled for this connection
+    # show_activity	boolean	whether activities related to this connection will be shown in presence updates
+    # two_way_link	boolean	whether this connection has a corresponding third party OAuth2 token
+    # visibility	integer	visibility of this connection
+
+    user = fields.ForeignKeyField("my_app.AuthenticatedUser", related_name="connections")
+    """The user this connection belongs to."""
+
+    db_id = fields.BigIntField(pk=True, unique=True, generated=True)
+    """The auto-genereated of the connection account."""
+
+    # id = fields.BigIntField(pk=True, unique=True)
+    # """The ID of the connection account."""
+
+    id = fields.CharField(max_length=128)
+
+    name = fields.CharField(max_length=128)
+    """The username of the connection account."""
+
+    type = fields.CharField(max_length=128)
+    """The service of this connection."""
+
+    revoked = fields.BooleanField(default=False)
+    """Whether the connection is revoked."""
+
+    verified = fields.BooleanField(default=False)
+    """Whether the connection is verified."""
+
+    friend_sync = fields.BooleanField(default=False)
+    """Whether friend sync is enabled for this connection."""
+
+    show_activity = fields.BooleanField(default=False)
+    """Whether activities related to this connection will be shown in presence updates."""
+
+    two_way_link = fields.BooleanField(default=False)
+    """Whether this connection has a corresponding third party OAuth2 token."""
+
+    visibility = fields.IntField(default=None, null=True)
+    """The visibility of this connection."""
+
+    @classmethod
+    async def from_api_resp(cls, user: AuthStorageDiscord, data: List[Dict]):
+        instances = []
+        await user.fetch_related('user')
+        for connection in data:
+            instance, _ = await cls.update_or_create(
+                user=user.user,
+                id=connection['id'],
+                name=connection['name'],
+                defaults={
+                    'type': connection['type'],
+                    'revoked': connection.get('revoked', False),
+                    'verified': connection.get('verified', False),
+                    'friend_sync': connection.get('friend_sync', False),
+                    'show_activity': connection.get('show_activity', False),
+                    'two_way_link': connection.get('two_way_link', False),
+                    'visibility': connection.get('visibility', None),
+                }
+            )
+            instances.append(instance)
+        return instances
+    
+    class Meta:
+        table = "AuthenticatedUserConnections"
 
 async def setup(*args):
     env = environ.Env(
