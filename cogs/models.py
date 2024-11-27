@@ -175,15 +175,23 @@ class Commands(Base):
     @property
     def author(self):
         return self.author_id
+    
+    @property
+    def user_id(self):
+        return self.author_id
 
     used = fields.DatetimeField()
-    uses = fields.BigIntField(default=1)
+    #uses = fields.BigIntField(default=1)
     prefix = fields.CharField(max_length=23)
     command = fields.CharField(max_length=100)
+    command_id = fields.BigIntField(null=True)
     failed = fields.BooleanField(default=False)
     app_command = fields.BooleanField(default=False)
+    is_guild_install = fields.BooleanField(default=True)
+    is_user_install = fields.BooleanField(default=False)
     args = fields.JSONField(null=True)
     kwargs = fields.JSONField(null=True)
+    transaction_id = fields.UUIDField(null=True)
 
     @classmethod
     async def bulk_insert(cls, bulk_data: list[dict]):
@@ -222,37 +230,57 @@ class Commands(Base):
         table = "Commands"
 
 class Blacklist(Base):
+    """Table relating blacklisted users and/or guilds."""
     offender_id = fields.BigIntField()
     offender_name = fields.CharField(max_length=100, null=True)
+    type = fields.CharField(max_length=10, null=True, default=None)
+    """Type of blacklist. Either _('user') or _('guild')."""
+
     reason = fields.CharField(max_length=255, null=True)
     timestamp = fields.DatetimeField()
 
     @classmethod
-    async def add(cls, user: discord.abc.User, reason: Optional[str]=None) -> Self:
+    async def add(cls, user: discord.Object, reason: Optional[str]=None) -> Self:
+        if isinstance(user, discord.abc.User):
+            type = 'user'
+        elif isinstance(user, discord.Guild):
+            type = 'guild'
+        else:
+            type = None
         instance, _ = await cls.update_or_create(
+            offender_id=user.id,
             defaults={
-                'offender_id': user.id,
-                'offender_name': user.name,
+                'offender_name': getattr(user, 'name', None),
+                'type': type,
                 'reason': reason,
-                'timestamp': datetime.datetime.now(),
+                'timestamp': discord.utils.utcnow(),
             }
         )
         return instance
 
     @classmethod
-    async def remove(cls, user: int) -> bool:
-        instance = await cls.filter(offender_id=user).first()
+    async def remove(cls, id: int, type: Optional[str]=None) -> bool:
+        instance = cls.filter(offender_id=id)
+        if type:
+            instance = instance.filter(type=type)
+        instance = await instance.first()
         if instance:
             await instance.delete()
         return not instance
 
     @classmethod
-    async def is_blacklisted(cls, id: int) -> bool:
-        return await cls.filter(offender_id=id).exists()
+    async def is_blacklisted(cls, id: int, type: Optional[str]=None) -> bool:
+        instance = cls.filter(offender_id=id)
+        if type:
+            instance = instance.filter(type=type)
+        return await instance.exists()
 
     @classmethod
-    async def blacklisted(cls, id: int) -> Optional[Self]:
-        return await cls.filter(offender_id=id).first()
+    async def blacklisted(cls, id: int, type: Optional[str]=None) -> Optional[Self]:
+        instance = cls.filter(offender_id=id)
+        if type:
+            instance = instance.filter(type=type)
+        return await instance.first()
 
     class Meta:
         table = "Blacklist"

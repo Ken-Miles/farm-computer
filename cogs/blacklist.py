@@ -1,9 +1,9 @@
-from typing import Literal, Optional, Union
+from typing import Literal, Optional
 
 import discord
 from discord import app_commands
 from discord.ext import commands
-from discord.ext.commands import BucketType, GuildConverter
+from discord.ext.commands import BucketType
 
 from cogs.models import Blacklist
 from utils import (
@@ -34,26 +34,35 @@ class BlacklistCog(CogU, name='Blacklist',hidden=True):
         pass
 
     @blacklist.command(name='add',description="Add a user or guild to the blacklist.")
-    async def blacklist_add(self, ctx: ContextU, user: Optional[discord.User]=None, guild: Optional[GuildConverter]=None, *, reason: Optional[str]=None):
+    async def blacklist_add(self, ctx: ContextU, object1: discord.Object, *, reason: Optional[str]=None):
         """Add a user to the blacklist."""
-        await ctx.defer()
+        await ctx.defer(ephemeral=True)
 
-        object = user or guild
+        #object = object1 or object2
 
-        if await Blacklist.add(object, reason):
-            emb = makeembed_successfulaction(description="Added user to blacklist.")
+        if not object1:
+            emb = makeembed_failedaction(description="Could not find object.")
+            return await ctx.reply(embed=emb)
+
+        if await Blacklist.add(object1, reason):
+            emb = makeembed_successfulaction(description="Added object to blacklist.")
             await ctx.reply(embed=emb)
         else:
-            emb = makeembed_failedaction(description="Could not add user to blacklist.")
+            emb = makeembed_failedaction(description="Could not add object to blacklist.")
         await ctx.reply(embed=emb)
 
     @blacklist.command(name='remove',description="Remove a user to the blacklist.")
-    async def blacklist_remove(self, ctx: ContextU, user: Optional[discord.User]=None, guild: Optional[GuildConverter]=None):
+    async def blacklist_remove(self, ctx: ContextU, object1: discord.Object):
         """Remove a user from the blacklist."""
-        await ctx.defer()
+        await ctx.defer(ephemeral=True)
 
-        object = user or guild
-        if await Blacklist.remove(object.id):
+        #object = object1 or object2
+
+        if not object1:
+            emb = makeembed_failedaction(description="Could not find object.")
+            return await ctx.reply(embed=emb)
+
+        if await Blacklist.remove(object1.id):
             emb = makeembed_successfulaction(description="Removed object from blacklist.")
             await ctx.reply(embed=emb)
         else:
@@ -64,7 +73,7 @@ class BlacklistCog(CogU, name='Blacklist',hidden=True):
     async def blacklist_list(self, ctx: ContextU, type: Optional[Literal['user','guild','all']]='user'):
         """List all users or guilds on the blacklist. Defaults to users."""
 
-        await ctx.defer()
+        await ctx.defer(ephemeral=True)
 
         if type == 'all':
             blacklist = await Blacklist.all()
@@ -83,7 +92,7 @@ class BlacklistCog(CogU, name='Blacklist',hidden=True):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
-        blacklist = await Blacklist.filter(offender_id=guild.id, type='guild')
+        blacklist = await Blacklist.filter(offender_id=guild.id)
         if blacklist:
             return await guild.leave()
     
@@ -97,3 +106,6 @@ class BlacklistCog(CogU, name='Blacklist',hidden=True):
 async def setup(bot: BotU):
     cog = BlacklistCog(bot)
     await bot.add_cog(cog)
+
+async def teardown(bot: BotU):
+    pass
