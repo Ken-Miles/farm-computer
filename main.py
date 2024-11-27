@@ -76,6 +76,18 @@ class BotU(OldBotU):
         return True
 
 
+bot = BotU(
+    command_prefix=commands.when_mentioned_or(*prefixes),
+    intents=intents,
+    activity=discord.Activity(type=discord.ActivityType.watching, name="Pelican Town"),
+    status=discord.Status.online,
+    help_command=Help(),
+    tree_cls=MentionableTree,
+    started_at=currentdate,
+)
+tree = bot.tree
+
+
 @bot.event
 async def on_ready():
     date = datetime.datetime.fromtimestamp(int(time.time()))
