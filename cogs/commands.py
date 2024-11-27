@@ -76,6 +76,7 @@ class CommandsCog(CogU, name='Farm Computer'):
     """
     prevs: list = []
     cache: Cache
+    logger = None
 
     def __init__(self, bot: BotU):
         self.bot = bot
