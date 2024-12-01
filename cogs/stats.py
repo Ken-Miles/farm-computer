@@ -507,7 +507,7 @@ class Stats(CogU, name="Statistics", hidden=True):
         __ = await get_translation_callable(ctx.interaction)
 
         if not hasattr(self, 'uptime'):
-            return await ctx.reply(embed=makeembed_failedaction(description=await __('Bot has not connected to the gateway yet.')),ephemeral=True, delete_after=10)
+            return await ctx.reply(embed=makeembed_failedaction(description='Bot has not connected to the gateway yet.'),ephemeral=True, delete_after=10)
 
         revision = self.get_last_commits()
         #embed = makeembed_bot(description='Latest Changes:' + revision, footer_icon_url=self.bot.user.display_avatar.url)
@@ -523,8 +523,8 @@ class Stats(CogU, name="Statistics", hidden=True):
             owner = self.bot.owner
 
         embed = makeembed_bot(
-            title=await __("Official Bot Server Invite"), 
-            description=(await __('Latest Changes:\n')) + revision, 
+            title="Official Bot Server Invite", 
+            description=('Latest Changes:\n') + revision, 
             url=str(SUPPORT_SERVER), 
             color=discord.Colour.blurple(),
             author=str(owner),
