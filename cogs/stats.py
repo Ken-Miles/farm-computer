@@ -551,17 +551,17 @@ class Stats(CogU, name="Statistics", hidden=True):
                 elif isinstance(channel, discord.VoiceChannel):
                     voice += 1
 
-        embed.add_field(name=await __('Members'), value="`{}` total\n`{}` unique".format(intcomma(total_members), intcomma(total_unique)))
-        embed.add_field(name=await __('Channels'), value="`{}` total\n`{}` text\n`{}` voice".format(intcomma(text + voice), intcomma(text), intcomma(voice)))
+        embed.add_field(name='Members', value="`{}` total\n`{}` unique".format(intcomma(total_members), intcomma(total_unique)))
+        embed.add_field(name='Channels', value="`{}` total\n`{}` text\n`{}` voice".format(intcomma(text + voice), intcomma(text), intcomma(voice)))
 
         memory_usage = self.process.memory_full_info().uss / 1024**2
         cpu_usage = self.process.cpu_percent() / psutil.cpu_count()
-        embed.add_field(name=await __('Process'), value=f'`{memory_usage:.2f}` MiB\n`{cpu_usage:.2f}`% CPU')
+        embed.add_field(name='Process', value=f'`{memory_usage:.2f}` MiB\n`{cpu_usage:.2f}`% CPU')
 
         version = pkg_resources.get_distribution('discord.py').version
-        embed.add_field(name=await __('Guilds'), value=f"`{intcomma(guilds)}`")
-        embed.add_field(name=await __('Commands Run'), value=f"`{intcomma(sum(self.bot.command_stats.values()))}`")
-        embed.add_field(name=await __('Uptime'), value=self.get_bot_uptime(brief=True))
+        embed.add_field(name='Guilds', value=f"`{intcomma(guilds)}`")
+        embed.add_field(name='Commands Run', value=f"`{intcomma(sum(self.bot.command_stats.values()))}`")
+        embed.add_field(name='Uptime', value=self.get_bot_uptime(brief=True))
 
         #embed.add_field(name=_('Support Server'), value="[Click]({SUPPORT_SERVER})"
         #embed.add_field(name=_("Trello Board"), value=dchyperlink("https://trello.com/b/RnEMKuA6/rainbow-six-stats", _("Click here!")))
@@ -572,7 +572,7 @@ class Stats(CogU, name="Statistics", hidden=True):
 
         view.add_item(
             discord.ui.Button(
-                label=await __("Install (Server)"),
+                label="Install (Server)",
                 style=discord.ButtonStyle.link,
                 url=oauth_url(self.bot.user.id, permissions=discord.Permissions(415068712000), scopes=['bot', 'applications.commands']),
             )
@@ -580,7 +580,7 @@ class Stats(CogU, name="Statistics", hidden=True):
 
         view.add_item(
             discord.ui.Button(
-                label=await __("Install (User)"),
+                label="Install (User)",
                 style=discord.ButtonStyle.link,
                 url=oauth_url(self.bot.user.id, scopes=['applications.commands',], integration_type=1),
             )
@@ -588,7 +588,7 @@ class Stats(CogU, name="Statistics", hidden=True):
 
         view.add_item(
             discord.ui.Button(
-                label=await __("Support Server"),
+                label="Support Server",
                 style=discord.ButtonStyle.link,
                 url=str(SUPPORT_SERVER),
             )
