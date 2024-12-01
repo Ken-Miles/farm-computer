@@ -566,7 +566,7 @@ class Stats(CogU, name="Statistics", hidden=True):
         #embed.add_field(name=_('Support Server'), value="[Click]({SUPPORT_SERVER})"
         #embed.add_field(name=_("Trello Board"), value=dchyperlink("https://trello.com/b/RnEMKuA6/rainbow-six-stats", _("Click here!")))
 
-        embed.set_footer(text=(await __("Made with discord.py v{}")).format(version), icon_url='http://i.imgur.com/5BFecvA.png')
+        embed.set_footer(text="Made with discord.py v{}".format(version), icon_url='http://i.imgur.com/5BFecvA.png')
 
         view = discord.ui.View()
 
