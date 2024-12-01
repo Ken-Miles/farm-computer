@@ -594,14 +594,6 @@ class Stats(CogU, name="Statistics", hidden=True):
             )
         )
 
-        view.add_item(
-            discord.ui.Button(
-                label=await __("Trello Board"),
-                style=discord.ButtonStyle.link,
-                url="https://trello.com/b/RnEMKuA6/rainbow-six-stats",
-            )
-        )
-
         await ctx.reply(embed=embed, view=view)
 
     async def censor_object(self, obj: str | discord.abc.Snowflake) -> str:
